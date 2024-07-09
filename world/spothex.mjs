@@ -7,8 +7,8 @@ export class SpotHex extends Spot {
   static height = 2 * SpotHex.r * Math.sin(SpotHex.a);
   static xStep = SpotHex.r + SpotHex.r * Math.cos(SpotHex.a);
 
-  constructor(pos) {
-    super(pos);
+  constructor(pos, z) {
+    super(pos, z);
   }
 
   getKey() {
@@ -25,20 +25,48 @@ export class SpotHex extends Spot {
     return new Vector(x, y);
   }
 
-  draw(ctx, optColor = "white") {
+  draw(ctx, hsl) {
     const vec = this.calcPos();
+
+    // draw walls
+    if (this.z > 0) {
+
+      ctx.fillStyle = hsl.clone().addLightness(-10).toColor();
+
+      ctx.beginPath();
+      ctx.moveTo(vec.x + SpotHex.r, vec.y - this.z);
+      ctx.lineTo(vec.x + SpotHex.r, vec.y);
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a), vec.y + SpotHex.r * Math.sin(SpotHex.a));
+      ctx.lineTo(vec.x, vec.y - this.z);
+      ctx.fill();
+
+      ctx.fillStyle = hsl.clone().addLightness(-5).toColor();
+      ctx.beginPath();
+      ctx.moveTo(vec.x, vec.y - this.z);
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 2), vec.y + SpotHex.r * Math.sin(SpotHex.a * 2));
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 3), vec.y + SpotHex.r * Math.sin(SpotHex.a * 3));
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 3), vec.y + SpotHex.r * Math.sin(SpotHex.a * 3) - this.z);
+      ctx.fill();
+
+      ctx.fillStyle = hsl.clone().addLightness(-2).toColor();
+      ctx.beginPath();
+      ctx.moveTo(vec.x + SpotHex.r * Math.cos(SpotHex.a), vec.y - this.z);
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a), vec.y + SpotHex.r * Math.sin(SpotHex.a));
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 2), vec.y + SpotHex.r * Math.sin(SpotHex.a * 2));
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 2), vec.y - this.z);
+      ctx.fill();
+    }
+
+    // draw floor
     ctx.beginPath();
     for (let i = 0; i < 6; i++) {
-      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * i), vec.y + SpotHex.r * Math.sin(SpotHex.a * i));
+      ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * i), vec.y + SpotHex.r * Math.sin(SpotHex.a * i) - this.z);
     }
     ctx.closePath();
 
-    if (optColor) {
-      ctx.fillStyle = optColor;
-      ctx.fill();
-    } else {
-      // ctx.lineWidth = 0.1;
-      ctx.stroke();
-    }
+    ctx.fillStyle = hsl.toColor();
+    ctx.fill();
+
+
   }
 }

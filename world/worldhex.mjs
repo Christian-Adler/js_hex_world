@@ -1,17 +1,20 @@
 import {Vector} from "../util/vector.mjs";
+import {scale} from "../util/utils.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
+import {HSL} from "../util/hsl.mjs";
 
 export class WorldHex extends World {
   constructor() {
     super();
-    this.cols = 50;
-    this.rows = 50;
+    this.cols = 5;
+    this.rows = 5;
     this.grid = new Map();
+    this.gridTilesDrawOrder = [];
 
-    for (let c = 0; c < this.cols; c++) {
-      for (let r = 0; r < this.rows; r++) {
-        const spotHex = new SpotHex(new Vector(c, r));
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const spotHex = new SpotHex(new Vector(c, r), Math.random() * 2);
         this.grid.set(spotHex.getKey(), spotHex);
       }
     }
@@ -46,6 +49,20 @@ export class WorldHex extends World {
         }
       }
     }
+
+    this.calcDrawOrder();
+  }
+
+  calcDrawOrder() {
+    this.gridTilesDrawOrder = [...this.grid.values()];
+    this.gridTilesDrawOrder.sort((a, b) => {
+      let compare = a.pos.y - b.pos.y;
+      if (compare === 0)
+        compare = (a.pos.x % 2) - (b.pos.x % 2);
+      if (compare === 0)
+        compare = b.z - a.z;
+      return compare;
+    });
   }
 
   getSpot(x, y) {
@@ -66,8 +83,8 @@ export class WorldHex extends World {
   }
 
   draw(ctx) {
-    for (const spot of this.grid.values()) {
-      spot.draw(ctx);
+    for (const spot of this.gridTilesDrawOrder) {
+      spot.draw(ctx, new HSL(scale(spot.z, 0, 1, 0, 360)));
     }
   }
 }
