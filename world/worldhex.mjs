@@ -18,7 +18,7 @@ export class WorldHex extends World {
         let spotHex;
         if (typeof getZValue === "function") {
           const zValue = getZValue(scale(c, 0, this.cols, 0, 1), scale(r, 0, this.rows, 0, 1));
-          if (zValue < 0.000001) continue;
+          if (zValue < 0.17) continue;
           spotHex = new SpotHex(new Vector(c, r), zValue * WorldHex.maxZ);
         } else
           spotHex = new SpotHex(new Vector(c, r), Math.random() * WorldHex.maxZ);
