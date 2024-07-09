@@ -33,7 +33,7 @@ const getZValue = (xPercent, yPercent) => {
   const i = (y * width + x) * 4;
   // noinspection UnnecessaryLocalVariableJS
   const R = heightMap[i];
-  return scale(R, 12, 180, 0, 1);
+  return scale(R, 106, 230, 0, 1);
 };
 
 export const createWorld = async () => {

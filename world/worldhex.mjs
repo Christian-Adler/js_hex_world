@@ -8,7 +8,7 @@ export class WorldHex extends World {
 
   constructor(getZValue) {
     super();
-    this.cols = 50;
+    this.cols = 100;
     this.rows = 50;
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
