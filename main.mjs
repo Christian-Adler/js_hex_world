@@ -1,4 +1,4 @@
-import {WorldHex} from "./worldhex.mjs";
+import {WorldHex} from "./world/worldhex.mjs";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');

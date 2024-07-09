@@ -1,4 +1,4 @@
-import {Vector} from "./util/vector.mjs";
+import {Vector} from "../util/vector.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
 

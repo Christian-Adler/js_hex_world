@@ -1,5 +1,5 @@
 import {Spot} from "./spot.mjs";
-import {Vector} from "./util/vector.mjs";
+import {Vector} from "../util/vector.mjs";
 
 export class SpotHex extends Spot {
   static a = 2 * Math.PI / 6;
