@@ -1,5 +1,6 @@
 import {Spot} from "./spot.mjs";
 import {Vector} from "../util/vector.mjs";
+import {WorldHex} from "./worldhex.mjs";
 
 export class SpotHex extends Spot {
   static a = 2 * Math.PI / 6;
@@ -8,7 +9,7 @@ export class SpotHex extends Spot {
   static xStep = SpotHex.r + SpotHex.r * Math.cos(SpotHex.a);
 
   constructor(pos, z) {
-    super(pos, z);
+    super(pos, z, WorldHex.maxZ);
   }
 
   getKey() {
@@ -31,7 +32,7 @@ export class SpotHex extends Spot {
     // draw walls
     if (this.z > 0) {
 
-      ctx.fillStyle = hsl.clone().addLightness(-10).toColor();
+      ctx.fillStyle = this.worldColor.clone().addLightness(-10).toColor();
 
       ctx.beginPath();
       ctx.moveTo(vec.x + SpotHex.r, vec.y - this.z);
@@ -40,7 +41,7 @@ export class SpotHex extends Spot {
       ctx.lineTo(vec.x, vec.y - this.z);
       ctx.fill();
 
-      ctx.fillStyle = hsl.clone().addLightness(-5).toColor();
+      ctx.fillStyle = this.worldColor.clone().addLightness(-5).toColor();
       ctx.beginPath();
       ctx.moveTo(vec.x, vec.y - this.z);
       ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 2), vec.y + SpotHex.r * Math.sin(SpotHex.a * 2));
@@ -48,7 +49,7 @@ export class SpotHex extends Spot {
       ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a * 3), vec.y + SpotHex.r * Math.sin(SpotHex.a * 3) - this.z);
       ctx.fill();
 
-      ctx.fillStyle = hsl.clone().addLightness(-2).toColor();
+      ctx.fillStyle = this.worldColor.clone().addLightness(-2).toColor();
       ctx.beginPath();
       ctx.moveTo(vec.x + SpotHex.r * Math.cos(SpotHex.a), vec.y - this.z);
       ctx.lineTo(vec.x + SpotHex.r * Math.cos(SpotHex.a), vec.y + SpotHex.r * Math.sin(SpotHex.a));
@@ -64,7 +65,7 @@ export class SpotHex extends Spot {
     }
     ctx.closePath();
 
-    ctx.fillStyle = hsl.toColor();
+    ctx.fillStyle = this.worldColor.toColor();
     ctx.fill();
 
 

@@ -1,16 +1,14 @@
 import {Vector} from "../util/vector.mjs";
-import {scale} from "../util/utils.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
-import {HSL} from "../util/hsl.mjs";
 
 export class WorldHex extends World {
   static maxZ = 2;
 
   constructor() {
     super();
-    this.cols = 5;
-    this.rows = 5;
+    this.cols = 50;
+    this.rows = 50;
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
 
@@ -21,6 +19,7 @@ export class WorldHex extends World {
       }
     }
 
+    // add holes
     for (let i = 0; i < this.cols * this.rows / 2.5; i++) {
       const col = Math.floor(Math.random() * this.cols);
       const row = Math.floor(Math.random() * this.rows);
@@ -86,7 +85,7 @@ export class WorldHex extends World {
 
   draw(ctx) {
     for (const spot of this.gridTilesDrawOrder) {
-      spot.draw(ctx, new HSL(scale(spot.z, 0, 1, 0, 360)));
+      spot.draw(ctx);
     }
   }
 }

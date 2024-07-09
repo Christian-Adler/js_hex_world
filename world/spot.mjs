@@ -1,7 +1,11 @@
+import {getWorldColor} from "./worldcolorrange.mjs";
+import {scale} from "../util/utils.mjs";
+
 export class Spot {
-  constructor(pos, z = 0) {
+  constructor(pos, z = 0, maxZ = 2) {
     this.pos = pos;
     this.z = z;
+    this.worldColor = getWorldColor(scale(this.z, 0, maxZ, 0, 1))
     this.neighbours = [];
     // for A* path finding
     this.prevSpot = null;
@@ -26,14 +30,12 @@ export class Spot {
     return this.pos.clone().add(0.5);
   }
 
-  draw(ctx, optColor = "white") {
+  draw(ctx) {
     // ctx.lineWidth = 0.1;
     ctx.beginPath()
     ctx.arc(this.pos.x, this.pos.y, 0.4, 0, Math.PI * 2);
-    if (optColor) {
-      ctx.fillStyle = optColor;
-      ctx.fill();
-    }
+    ctx.fillStyle = 'white';
+    ctx.fill();
     // ctx.stroke();
   }
 }
