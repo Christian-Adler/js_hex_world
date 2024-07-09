@@ -1,11 +1,12 @@
 import {Vector} from "../util/vector.mjs";
+import {scale} from "../util/utils.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
 
 export class WorldHex extends World {
   static maxZ = 2;
 
-  constructor() {
+  constructor(getZValue) {
     super();
     this.cols = 50;
     this.rows = 50;
@@ -14,18 +15,26 @@ export class WorldHex extends World {
 
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
-        const spotHex = new SpotHex(new Vector(c, r), Math.random() * WorldHex.maxZ);
+        let spotHex;
+        if (typeof getZValue === "function") {
+          const zValue = getZValue(scale(c, 0, this.cols, 0, 1), scale(r, 0, this.rows, 0, 1));
+          if (zValue < 0.000001) continue;
+          spotHex = new SpotHex(new Vector(c, r), zValue * WorldHex.maxZ);
+        } else
+          spotHex = new SpotHex(new Vector(c, r), Math.random() * WorldHex.maxZ);
         this.grid.set(spotHex.getKey(), spotHex);
       }
     }
 
     // add holes
-    for (let i = 0; i < this.cols * this.rows / 2.5; i++) {
-      const col = Math.floor(Math.random() * this.cols);
-      const row = Math.floor(Math.random() * this.rows);
-      if (col === this.cols - 1 && row === this.rows - 1 || col === 0 && row === 0)
-        continue;
-      this.grid.delete(new Vector(col, row).toString());
+    if (typeof getZValue !== "function") {
+      for (let i = 0; i < this.cols * this.rows / 2.5; i++) {
+        const col = Math.floor(Math.random() * this.cols);
+        const row = Math.floor(Math.random() * this.rows);
+        if (col === this.cols - 1 && row === this.rows - 1 || col === 0 && row === 0)
+          continue;
+        this.grid.delete(new Vector(col, row).toString());
+      }
     }
 
     // find neighbours

@@ -1,4 +1,4 @@
-import {WorldHex} from "./world/worldhex.mjs";
+import {createWorld} from "./world/heightmap.mjs";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
@@ -23,7 +23,7 @@ const updateWorldSettings = () => {
 
 updateWorldSettings();
 
-const world = new WorldHex();
+const world = await createWorld();
 
 const update = () => {
 
@@ -38,8 +38,11 @@ const update = () => {
 
   ctx.save();
 
-  world.scale(ctx, worldWidth, worldHeight);
-  world.draw(ctx);
+  if (world) {
+    world.scale(ctx, worldWidth, worldHeight);
+    world.draw(ctx);
+    // TODO redraw world only if size changed - otherwise store image and draw image
+  }
 
   ctx.restore();
 
