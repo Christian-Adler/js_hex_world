@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>A*</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, serif;
+        }
+
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            position: relative;
+        }
+
+        body {
+            background: rgb(2, 0, 36);
+            /*cursor: none;*/
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas" height="500" width="500"></canvas>
+
+<script src="util/utils.mjs" type="module"></script>
+<script src="util/vector.mjs" type="module"></script>
+<script src="spot.mjs" type="module"></script>
+<script src="spothex.mjs" type="module"></script>
+<script src="world.mjs" type="module"></script>
+<script src="worldhex.mjs" type="module"></script>
+<script src="util/astar.mjs" type="module"></script>
+<script src="main.mjs" type="module"></script>
+</body>
+</html>
