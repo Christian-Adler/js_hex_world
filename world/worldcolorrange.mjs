@@ -8,7 +8,9 @@ const colors = [new HSL(120), new HSL(84), new HSL(92, 100, 19), new HSL(92, 0, 
  * @param val 0-1 low to high
  */
 export const getWorldColor = (val) => {
-  const slotIdx = Math.floor((colors.length - 1) * val);
+  let slotIdx = Math.floor((colors.length - 1) * val);
+  if (slotIdx < 0) slotIdx = 0;
+  if (slotIdx >= colors.length - 1) slotIdx = colors.length - 2;
   const color1 = colors[slotIdx];
   const color2 = colors[slotIdx + 1];
 
