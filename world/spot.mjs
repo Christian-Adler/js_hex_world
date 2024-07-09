@@ -1,6 +1,7 @@
 export class Spot {
-  constructor(pos) {
+  constructor(pos, z = 0) {
     this.pos = pos;
+    this.z = z;
     this.neighbours = [];
     // for A* path finding
     this.prevSpot = null;
