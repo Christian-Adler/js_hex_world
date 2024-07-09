@@ -5,6 +5,8 @@ import {SpotHex} from "./spothex.mjs";
 import {HSL} from "../util/hsl.mjs";
 
 export class WorldHex extends World {
+  static maxZ = 2;
+
   constructor() {
     super();
     this.cols = 5;
@@ -14,7 +16,7 @@ export class WorldHex extends World {
 
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
-        const spotHex = new SpotHex(new Vector(c, r), Math.random() * 2);
+        const spotHex = new SpotHex(new Vector(c, r), Math.random() * WorldHex.maxZ);
         this.grid.set(spotHex.getKey(), spotHex);
       }
     }
@@ -78,8 +80,8 @@ export class WorldHex extends World {
   }
 
   scale(ctx, worldWidth, worldHeight) {
-    ctx.scale(worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r), worldHeight / ((this.rows + 0.5) * SpotHex.height));
-    ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a));
+    ctx.scale(worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r), worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ));
+    ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldHex.maxZ);
   }
 
   draw(ctx) {
