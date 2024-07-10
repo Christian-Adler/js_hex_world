@@ -61,7 +61,7 @@ export class AStar {
         if (this.closedSet.includes(neighbour))
           continue; // already done
 
-        const tentativeGScore = minFSpot.g + minFSpot.distanceToSpot(neighbour);
+        const tentativeGScore = minFSpot.g + minFSpot.distanceToSpot(neighbour) + 2 * Math.abs(minFSpot.z - neighbour.z);
         if (tentativeGScore >= neighbour.g && this.openSet.includes(neighbour))
           continue; // not a better path
 
