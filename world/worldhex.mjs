@@ -1,24 +1,23 @@
 import {Vector} from "../util/vector.mjs";
-import {scale} from "../util/utils.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
 
 export class WorldHex extends World {
-  static maxZ = 2;
+  static maxZ = 7;
 
   constructor(getZValue) {
     super();
-    this.cols = 100;
+    this.cols = 50;
     this.rows = 50;
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
 
-    for (let r = 0; r < this.rows; r++) {
-      for (let c = 0; c < this.cols; c++) {
+    for (let r = -WorldHex.maxZ; r < this.rows + WorldHex.maxZ; r++) {
+      for (let c = -1; c < this.cols + 1; c++) {
         let spotHex;
         if (typeof getZValue === "function") {
-          const zValue = getZValue(scale(c, 0, this.cols, 0, 1), scale(r, 0, this.rows, 0, 1));
-          if (zValue < 0.17) continue;
+          const zValue = getZValue(c, r);
+          if (zValue < 0) continue;
           spotHex = new SpotHex(new Vector(c, r), zValue * WorldHex.maxZ);
         } else
           spotHex = new SpotHex(new Vector(c, r), Math.random() * WorldHex.maxZ);
