@@ -1,4 +1,5 @@
 import {WorldHex} from "./world/worldhex.mjs";
+import {AStar} from "./util/astar.mjs";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
@@ -24,6 +25,7 @@ const updateWorldSettings = () => {
 updateWorldSettings();
 
 const world = new WorldHex();
+let aStar;
 
 const update = () => {
 
@@ -34,6 +36,14 @@ const update = () => {
   if (worldUpdated) {
     worldUpdated = false;
     world.worldUpdate(worldWidth, worldHeight);
+    if (!aStar) {
+      world.determineNeighboursForAllTiles();
+      aStar = new AStar(world.getStart(), world.getEnd());
+      let finished = false;
+      do {
+        finished = aStar.next();
+      } while (!finished);
+    }
   }
 
   ctx.clearRect(0, 0, worldWidth, worldHeight);
@@ -43,6 +53,9 @@ const update = () => {
   if (world) {
     world.scale(ctx, worldWidth, worldHeight);
     world.draw(ctx);
+
+    if (aStar)
+      aStar.draw(ctx);
     // TODO redraw world only if size changed - otherwise store image and draw image
     // TODO move world
   }

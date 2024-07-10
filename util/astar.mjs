@@ -1,3 +1,5 @@
+import {Vector} from "./vector.mjs";
+
 export class AStar {
   constructor(start, end) {
     this.openSet = [];
@@ -30,7 +32,7 @@ export class AStar {
 
   next() {
     if (this.shortestPathToEnd)
-      return; // already calculated
+      return true; // already calculated
 
     if (this.openSet.length > 0) {
       let minFIdx = 0;
@@ -47,7 +49,7 @@ export class AStar {
         console.log('Found path to end');
         this.shortestPathToEnd = this.constructPath(minFSpot);
         this.shortestPathToAct = null;
-        return;
+        return true;
       }
       this.shortestPathToAct = this.constructPath(minFSpot);
 
@@ -70,36 +72,73 @@ export class AStar {
         neighbour.f = neighbour.g + neighbour.h;
         neighbour.prevSpot = minFSpot;
       }
+
+      return false;
     }
+
+    return true;
   }
 
   drawPath(ctx, path, color) {
     ctx.strokeStyle = color;
     ctx.lineCap = "round";
     ctx.beginPath();
-    let actPathVec = path[0].calcPos();
-    ctx.moveTo(actPathVec.x, actPathVec.y);
+    let firstSpot = true;
     for (const spot of path) {
-      actPathVec = spot.calcPos();
-      ctx.lineTo(actPathVec.x, actPathVec.y);
+      const actPathVec = spot.calcPos();
+      if (firstSpot) {
+        firstSpot = false;
+        ctx.moveTo(actPathVec.x, actPathVec.y - spot.z);
+      } else
+        ctx.lineTo(actPathVec.x, actPathVec.y - spot.z);
       // spot.draw(ctx,color);
     }
     ctx.stroke();
   }
 
+  drawPathQuadratic(ctx, path, color, offset = 0) {
+    ctx.strokeStyle = color;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+
+    let vecPrevMid = null;
+    let vecPrev = null;
+    for (let i = 0; i < path.length; i++) {
+      const spot = path[i];
+      const actPathVec = spot.calcPos();
+
+      const yAdjustedVec = new Vector(actPathVec.x, actPathVec.y - spot.z - offset);
+
+      if (i === 0) {
+        ctx.moveTo(yAdjustedVec.x, yAdjustedVec.y);
+      } else {
+        // quadratic line from between two tiles as endpoints and tile as control point
+        const midVec = vecPrev.clone().addVec(yAdjustedVec.clone().subVec(vecPrev).mult(0.5));
+        ctx.quadraticCurveTo(vecPrev.x, vecPrev.y, midVec.x, midVec.y);
+        if (i === path.length - 1) // last half of last tile
+          ctx.lineTo(yAdjustedVec.x, yAdjustedVec.y);
+        vecPrevMid = midVec;
+      }
+      vecPrev = yAdjustedVec;
+    }
+    ctx.stroke();
+  }
+
   draw(ctx) {
-    for (const spot of this.closedSet) {
-      spot.draw(ctx, 'rgb(6,0,99)');
-    }
-    for (const spot of this.openSet) {
-      spot.draw(ctx, 'rgb(18,88,186)');
-    }
+    // for (const spot of this.closedSet) {
+    //   spot.draw(ctx, 'rgb(6,0,99)');
+    // }
+    // for (const spot of this.openSet) {
+    //   spot.draw(ctx, 'rgb(18,88,186)');
+    // }
     ctx.lineWidth = 0.4;
     if (this.shortestPathToAct)
-      this.drawPath(ctx, this.shortestPathToAct, 'purple');
+      this.drawPath(ctx, this.shortestPathToAct, 'grey');
 
-    if (this.shortestPathToEnd)
-      this.drawPath(ctx, this.shortestPathToEnd, 'blue');
+    if (this.shortestPathToEnd) {
+      this.drawPathQuadratic(ctx, this.shortestPathToEnd, 'rgba(0,0,0,0.15)', 0);
+      this.drawPathQuadratic(ctx, this.shortestPathToEnd, 'purple', 1);
+    }
   }
 
 }
