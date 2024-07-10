@@ -113,8 +113,8 @@ export class WorldHex extends World {
   }
 
   worldUpdate(worldWidth, worldHeight) {
-    const colsWouldBe = WorldHex.widthTilesFactor * worldWidth;
-    const rowsWouldBe = WorldHex.heightTilesFactor * worldHeight;
+    const colsWouldBe = Math.floor(WorldHex.widthTilesFactor * worldWidth);
+    const rowsWouldBe = Math.floor(WorldHex.heightTilesFactor * worldHeight);
     if (this.cols !== colsWouldBe || this.rows !== rowsWouldBe) {
       this.cols = colsWouldBe;
       this.rows = rowsWouldBe;
