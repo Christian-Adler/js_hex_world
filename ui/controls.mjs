@@ -1,7 +1,7 @@
 let aStar = null;
 
 const ranges = [
-  {id: 'gScoreZFactor', setter: (value) => aStar.gScoreZFactor = value},
+  {id: 'gScoreZFactor', exponent: 1.5, timer: null, setter: (value) => aStar.gScoreZFactor = value},
 ];
 
 const switchInputs = document.querySelector('#switchInputs');
@@ -14,6 +14,11 @@ switchInputs.addEventListener('click', (e) => {
     e.target.innerText = 'X';
 });
 
+const pathInfoDiv = document.querySelector('#pathInfo');
+const showAStarPathInfo = (info) => {
+  pathInfoDiv.innerText = info;
+};
+
 const initControls = (aStarRef) => {
   aStar = aStarRef;
 
@@ -21,11 +26,19 @@ const initControls = (aStarRef) => {
     const range = document.getElementById(rangesItem.id);
     range.addEventListener("input", (evt) => {
       let val = range.value;
-      evt.target.nextSibling.innerText = val;
+      if (val >= 10)
+        val = 1000;
+      else if (typeof rangesItem.exponent === 'number')
+        val = val ** rangesItem.exponent;
+      evt.target.nextSibling.innerText = val.toFixed(3);
       val = parseFloat(val);
-      rangesItem.setter(val);
+      clearTimeout(rangesItem.timer);
+      rangesItem.timer = setTimeout(() => {
+        rangesItem.timer = null;
+        rangesItem.setter(val);
+      }, 500);
     });
   }
 };
 
-export {initControls}
+export {initControls, showAStarPathInfo}

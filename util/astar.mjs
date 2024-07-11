@@ -1,4 +1,5 @@
 import {Vector} from "./vector.mjs";
+import {showAStarPathInfo} from "../ui/controls.mjs";
 
 export class AStar {
   constructor() {
@@ -67,6 +68,7 @@ export class AStar {
         console.log('Found path to end');
         this._shortestPathToEnd = this._constructPath(minFSpot);
         this._shortestPathToAct = null;
+        this.showPathInfo();
         return true;
       }
       this._shortestPathToAct = this._constructPath(minFSpot);
@@ -74,7 +76,7 @@ export class AStar {
       this._openSet.splice(minFIdx, 1);
       this._closedSet.push(minFSpot);
 
-      const neighbours = minFSpot.getNeighbours();
+      const neighbours = minFSpot.getNeighbours(); // allow to determine neighbours on the fly??
       for (const neighbour of neighbours) {
         if (this._closedSet.includes(neighbour))
           continue; // already done
@@ -95,6 +97,17 @@ export class AStar {
     }
 
     return true;
+  }
+
+  showPathInfo() {
+    let zDiff = 0;
+    let prevZVal = 0;
+    for (const spot of this._shortestPathToEnd) {
+      const z = spot.z;
+      zDiff += Math.abs(z - prevZVal);
+      prevZVal = z;
+    }
+    showAStarPathInfo(`Path len: ${this._shortestPathToEnd.length}, Height distance: ${zDiff.toFixed(2)}`);
   }
 
   _heuristicCostEstimate(spot) {
