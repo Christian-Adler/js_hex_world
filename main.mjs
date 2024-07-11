@@ -38,11 +38,10 @@ const update = () => {
     world.worldUpdate(worldWidth, worldHeight);
     if (!aStar) {
       world.determineNeighboursForAllTiles();
-      aStar = new AStar(world.getStart(), world.getEnd());
-      let finished = false;
-      do {
-        finished = aStar.next();
-      } while (!finished);
+      aStar = new AStar();
+      aStar.start = world.getStart();
+      aStar.end = world.getEnd();
+      aStar.calcPath();
     }
   }
 
@@ -58,6 +57,7 @@ const update = () => {
       aStar.draw(ctx);
     // TODO redraw world only if size changed - otherwise store image and draw image
     // TODO move world
+    // TODO don't allow neighbours if z differnce is to high
   }
 
   ctx.restore();

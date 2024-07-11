@@ -1,74 +1,92 @@
 import {Vector} from "./vector.mjs";
 
 export class AStar {
-  constructor(start, end) {
-    this.openSet = [];
-    this.closedSet = [];
-    this.start = start;
-    this.end = end;
+  constructor() {
+    this._openSet = [];
+    this._closedSet = [];
 
-    this.start.g = 0;
-    this.openSet.push(start);
+    this._shortestPathToAct = null;
+    this._shortestPathToEnd = null;
 
-    this.shortestPathToAct = null;
-    this.shortestPathToEnd = null;
+    this._gScoreZFactor = 2;
+
+    this._start = null;
+    this._end = null;
   }
 
-  heuristicCostEstimate(spot) {
-    // return spot.manhattenDistanceToSpot(this.end);
-    return spot.distanceToSpot(this.end);
+  set start(value) {
+    this._start = value;
+    this.calcPath();
   }
 
-  constructPath(spot) {
-    const path = [];
-    let current = spot;
-    while (current) {
-      path.push(current);
-      current = current.prevSpot;
-    }
-    path.reverse();
-    return path;
+  set end(value) {
+    this._end = value;
+    this.calcPath();
   }
+
+  set gScoreZFactor(value) {
+    this._gScoreZFactor = Math.max(0, value);
+    this.calcPath();
+  }
+
+  calcPath() {
+    if (!this._start || !this._end) return;
+
+    this._shortestPathToAct = null;
+    this._shortestPathToEnd = null;
+
+    this._openSet = [];
+    this._closedSet = [];
+
+    this._start.g = 0;
+    this._openSet.push(this._start);
+
+    let finished = false;
+    do {
+      finished = this.next();
+    } while (!finished);
+  }
+
 
   next() {
-    if (this.shortestPathToEnd)
+    if (this._shortestPathToEnd)
       return true; // already calculated
 
-    if (this.openSet.length > 0) {
+    if (this._openSet.length > 0) {
       let minFIdx = 0;
-      let minFSpot = this.openSet[0];
-      for (let i = 1; i < this.openSet.length; i++) {
-        const spot = this.openSet[i];
+      let minFSpot = this._openSet[0];
+      for (let i = 1; i < this._openSet.length; i++) {
+        const spot = this._openSet[i];
         if (spot.f < minFSpot.f) {
           minFSpot = spot;
           minFIdx = i;
         }
       }
 
-      if (minFSpot === this.end) {
+      if (minFSpot === this._end) {
         console.log('Found path to end');
-        this.shortestPathToEnd = this.constructPath(minFSpot);
-        this.shortestPathToAct = null;
+        this._shortestPathToEnd = this._constructPath(minFSpot);
+        this._shortestPathToAct = null;
         return true;
       }
-      this.shortestPathToAct = this.constructPath(minFSpot);
+      this._shortestPathToAct = this._constructPath(minFSpot);
 
-      this.openSet.splice(minFIdx, 1);
-      this.closedSet.push(minFSpot);
+      this._openSet.splice(minFIdx, 1);
+      this._closedSet.push(minFSpot);
 
       const neighbours = minFSpot.getNeighbours();
       for (const neighbour of neighbours) {
-        if (this.closedSet.includes(neighbour))
+        if (this._closedSet.includes(neighbour))
           continue; // already done
 
-        const tentativeGScore = minFSpot.g + minFSpot.distanceToSpot(neighbour) + 2 * Math.abs(minFSpot.z - neighbour.z);
-        if (tentativeGScore >= neighbour.g && this.openSet.includes(neighbour))
+        const tentativeGScore = minFSpot.g + minFSpot.distanceToSpot(neighbour) + this._gScoreZFactor * Math.abs(minFSpot.z - neighbour.z);
+        if (tentativeGScore >= neighbour.g && this._openSet.includes(neighbour))
           continue; // not a better path
 
-        this.openSet.push(neighbour);
+        this._openSet.push(neighbour);
 
         neighbour.g = tentativeGScore;
-        neighbour.h = this.heuristicCostEstimate(neighbour);
+        neighbour.h = this._heuristicCostEstimate(neighbour);
         neighbour.f = neighbour.g + neighbour.h;
         neighbour.prevSpot = minFSpot;
       }
@@ -79,7 +97,22 @@ export class AStar {
     return true;
   }
 
-  drawPath(ctx, path, color) {
+  _heuristicCostEstimate(spot) {
+    return spot.distanceToSpot(this._end);
+  }
+
+  _constructPath(spot) {
+    const path = [];
+    let current = spot;
+    while (current) {
+      path.push(current);
+      current = current.prevSpot;
+    }
+    path.reverse();
+    return path;
+  }
+
+  _drawPath(ctx, path, color) {
     ctx.strokeStyle = color;
     ctx.lineCap = "round";
     ctx.beginPath();
@@ -96,7 +129,7 @@ export class AStar {
     ctx.stroke();
   }
 
-  drawPathQuadratic(ctx, path, color, offset = 0) {
+  _drawPathQuadratic(ctx, path, color, offset = 0) {
     ctx.strokeStyle = color;
     ctx.lineCap = "round";
     ctx.beginPath();
@@ -132,12 +165,12 @@ export class AStar {
     //   spot.draw(ctx, 'rgb(18,88,186)');
     // }
     ctx.lineWidth = 0.4;
-    if (this.shortestPathToAct)
-      this.drawPath(ctx, this.shortestPathToAct, 'grey');
+    if (this._shortestPathToAct)
+      this._drawPath(ctx, this._shortestPathToAct, 'grey');
 
-    if (this.shortestPathToEnd) {
-      this.drawPathQuadratic(ctx, this.shortestPathToEnd, 'rgba(0,0,0,0.15)', 0);
-      this.drawPathQuadratic(ctx, this.shortestPathToEnd, 'purple', 1);
+    if (this._shortestPathToEnd) {
+      this._drawPathQuadratic(ctx, this._shortestPathToEnd, 'rgba(0,0,0,0.15)', 0);
+      this._drawPathQuadratic(ctx, this._shortestPathToEnd, 'purple', 1);
     }
   }
 
