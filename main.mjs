@@ -1,5 +1,6 @@
 import {WorldHex} from "./world/worldhex.mjs";
 import {AStar} from "./util/astar.mjs";
+import {initControls} from "./ui/controls.mjs";
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
@@ -39,6 +40,7 @@ const update = () => {
     if (!aStar) {
       world.determineNeighboursForAllTiles();
       aStar = new AStar();
+      initControls(aStar);
       aStar.start = world.getStart();
       aStar.end = world.getEnd();
       aStar.calcPath();
@@ -55,9 +57,6 @@ const update = () => {
 
     if (aStar)
       aStar.draw(ctx);
-    // TODO redraw world only if size changed - otherwise store image and draw image
-    // TODO move world
-    // TODO don't allow neighbours if z differnce is to high
   }
 
   ctx.restore();

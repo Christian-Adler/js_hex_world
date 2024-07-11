@@ -1,0 +1,63 @@
+* {
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: Arial, serif;
+}
+
+html, body {
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+body {
+    background: rgb(2, 0, 36);
+    background: linear-gradient(180deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
+    /*cursor: none;*/
+}
+
+/* Input >> */
+#inputs {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    color: white;
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+}
+
+#inputs.min {
+    overflow: hidden;
+    height: 13px;
+    width: 11px;
+    display: block;
+}
+
+.line {
+    border-bottom: 1px solid grey;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+}
+
+#switchInputs {
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#inputs .labelText {
+    width: 100px;
+    display: inline-block;
+}
+
+.rangeValue {
+    min-width: 50px;
+    text-align: right;
+    display: inline-block;
+}
+
+/* << Input */

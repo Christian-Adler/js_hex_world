@@ -3,35 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>HexWorld</title>
-    <style>
-        * {
-            padding: 0;
-            margin: 0;
-            overflow: hidden;
-            font-family: Arial, serif;
-        }
-
-        html, body {
-            height: 100vh;
-            width: 100vw;
-            position: relative;
-        }
-
-        body {
-            background: rgb(2, 0, 36);
-            background: linear-gradient(180deg, rgba(2, 0, 36, 1) 0%, rgba(9, 9, 121, 1) 35%, rgba(0, 212, 255, 1) 100%);
-            /*cursor: none;*/
-        }
-
-        #heightmap {
-            position: absolute;
-            top: 0;
-            left: 0;
-            visibility: hidden;
-        }
-    </style>
+    <link href="style.css" rel="stylesheet"/>
 </head>
 <body>
+<div id="inputs" class="">
+    <div id="switchInputs" class="line">X</div>
+    <label><span class="labelText">gScoreZFactor:</span>
+        <input id="gScoreZFactor" type="range" min="0" max="2000" value="2" step="1"/><span
+                class="rangeValue">2</span>
+    </label>
+</div>
 
 <canvas id="canvas" height="500" width="500"></canvas>
 <canvas id="heightmap" height="500" width="500"></canvas>
@@ -47,6 +28,7 @@
 <script src="world/worldhex.mjs" type="module"></script>
 <script src="world/heightmap.mjs" type="module"></script>
 <script src="util/astar.mjs" type="module"></script>
+<script src="ui/controls.mjs" type="module"></script>
 <script src="main.mjs" type="module"></script>
 </body>
 </html>
