@@ -2,17 +2,29 @@ import {Vector} from "../util/vector.mjs";
 import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
 import {getNoiseValAt} from "./heightmap.mjs";
+import {actMousePos} from "../ui/mouse.mjs";
 
 export class WorldHex extends World {
   static maxZ = 7;
   static widthTilesFactor = 50 / 1500;
   static heightTilesFactor = 50 / 1200;
 
+  static calcAdjustedPos(x, y) {
+    const pos = SpotHex.calcSpotPos(x, y)
+    const zValue = getNoiseValAt(x, y);
+    if (zValue < 0) // no land?
+      return pos;
+    pos.add(0, -zValue * WorldHex.maxZ);
+    return pos;
+  }
+
   constructor() {
     super();
     // world pos on screen top left
     this.worldTop = 0;
     this.worldLeft = 0;
+
+    this.actMousePosWorldCoordinates = new Vector(0, 0);
 
     this.cols = -1;
     this.rows = -1;
@@ -125,8 +137,20 @@ export class WorldHex extends World {
     }
   }
 
+  updateMouseWorldPos(worldWidth, worldHeight) {
+    const screenActMousePos = actMousePos;
+    this.actMousePosWorldCoordinates.set(
+        Math.round((screenActMousePos.x + SpotHex.r) / worldWidth * (this.cols - 1)),
+        Math.round((screenActMousePos.y - WorldHex.maxZ) / worldHeight * (this.rows + 0.5))
+    );
+    // console.log(this.actMousePosWorldCoordinates);
+  }
+
   scale(ctx, worldWidth, worldHeight) {
-    ctx.scale(worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r), worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ));
+    ctx.scale(
+        worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r),
+        worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ)
+    );
     ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldHex.maxZ);
   }
 

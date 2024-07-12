@@ -65,7 +65,7 @@ export class AStar {
       }
 
       if (minFSpot === this._end) {
-        console.log('Found path to end');
+        // console.log('Found path to end');
         this._shortestPathToEnd = this._constructPath(minFSpot);
         this._shortestPathToAct = null;
         this.showPathInfo();
