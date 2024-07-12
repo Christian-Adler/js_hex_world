@@ -8,12 +8,14 @@ export class SpotHex extends Spot {
   static height = 2 * SpotHex.r * Math.sin(SpotHex.a);
   static xStep = SpotHex.r + SpotHex.r * Math.cos(SpotHex.a);
 
-  constructor(pos, z) {
-    super(pos, z, WorldHex.maxZ);
+  static calcSpotPos(x, y) {
+    const xAdjusted = x * SpotHex.xStep;
+    const yAdjusted = y * SpotHex.height + (x % 2 === 0 ? 0 : SpotHex.height / 2);
+    return new Vector(xAdjusted, yAdjusted);
   }
 
-  getKey() {
-    return this.pos.toString();
+  constructor(pos, z) {
+    super(pos, z, WorldHex.maxZ);
   }
 
   distanceToSpot(other) {
@@ -21,9 +23,7 @@ export class SpotHex extends Spot {
   }
 
   calcPos() {
-    const x = this.pos.x * SpotHex.xStep;
-    const y = this.pos.y * SpotHex.height + (this.pos.x % 2 === 0 ? 0 : SpotHex.height / 2);
-    return new Vector(x, y);
+    return SpotHex.calcSpotPos(this.pos.x, this.pos.y);
   }
 
   draw(ctx, hsl) {
