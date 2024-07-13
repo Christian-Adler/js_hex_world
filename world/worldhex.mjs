@@ -9,25 +9,16 @@ export class WorldHex extends World {
   static widthTilesFactor = 50 / 1500;
   static heightTilesFactor = 50 / 1200;
 
-  static calcAdjustedPos(x, y) {
-    const pos = SpotHex.calcSpotPos(x, y)
-    const zValue = getNoiseValAt(x, y);
-    if (zValue < 0) // no land?
-      return pos;
-    pos.add(0, -zValue * WorldHex.maxZ);
-    return pos;
-  }
-
   constructor() {
     super();
     // world pos on screen top left
     this.worldTop = 0;
     this.worldLeft = 0;
 
-    this.actMousePosWorldCoordinates = new Vector(0, 0);
-
     this.cols = -1;
     this.rows = -1;
+    this.scaleFactorX = 1;
+    this.scaleFactorY = 1;
 
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
@@ -135,28 +126,77 @@ export class WorldHex extends World {
 
       this.calcDrawOrder();
     }
+
+    this.scaleFactorX = worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r);
+    this.scaleFactorY = worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ);
   }
 
-  updateMouseWorldPos(worldWidth, worldHeight) {
-    const screenActMousePos = actMousePos;
-    this.actMousePosWorldCoordinates.set(
-        Math.round((screenActMousePos.x + SpotHex.r) / worldWidth * (this.cols - 1)),
-        Math.round((screenActMousePos.y - WorldHex.maxZ) / worldHeight * (this.rows + 0.5))
-    );
-    // console.log(this.actMousePosWorldCoordinates);
+  worldUpdateTilesPixelPos(ctx) {
+    const transform = ctx.getTransform();
+    const matrix = new DOMMatrixReadOnly(transform);
+
+    for (const spotHex of this.grid.values()) {
+      const pos = spotHex.hexPos.clone();
+      pos.add(0, -spotHex.z);
+      const transformedPoint = matrix.transformPoint(pos);
+      spotHex.pixelPos = Vector.fromPoint(transformedPoint);
+    }
+
   }
 
   scale(ctx, worldWidth, worldHeight) {
-    ctx.scale(
-        worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r),
-        worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ)
-    );
+    ctx.scale(this.scaleFactorX, this.scaleFactorY);
     ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldHex.maxZ);
+  }
+
+  #calcApproximateMouseWorldPos() {
+    return new Vector(actMousePos.x / (SpotHex.xStep * this.scaleFactorX), actMousePos.y / (SpotHex.height * this.scaleFactorY)).round();
   }
 
   draw(ctx) {
     for (const spot of this.gridTilesDrawOrder) {
       spot.draw(ctx);
+    }
+  }
+
+  drawPixelCoordinates(ctx) {
+    ctx.fillStyle = 'white';
+    for (const hexSpot of this.gridTilesDrawOrder) {
+      ctx.beginPath();
+      ctx.rect(hexSpot.pixelPos.x, hexSpot.pixelPos.y, 5, 5);
+      ctx.fill();
+    }
+  }
+
+  highlightMousePos(ctx) {
+    // find nearest mouse pos Spot
+    const actMouse = actMousePos;
+    // console.log('actMouse', actMouse);
+    const mouseWorldPos = this.#calcApproximateMouseWorldPos();
+    // console.log('mouseWorldPos', mouseWorldPos);
+    let nearestSpot = null;
+    let nearestSpotDiff = Number.MAX_SAFE_INTEGER;
+    for (let x = mouseWorldPos.x - 1; x <= mouseWorldPos.x + 1; x++) {
+      for (let y = mouseWorldPos.y - 5; y <= mouseWorldPos.y + 5; y++) {
+        const actSpot = this.getSpot(x, y);
+        if (actSpot) {
+          const dist2Mouse = actSpot.pixelPos.distance(actMouse);
+          // console.log(dist2Mouse);
+          if (!nearestSpot) {
+            nearestSpot = actSpot;
+            nearestSpotDiff = dist2Mouse;
+          } else if (dist2Mouse < nearestSpotDiff) {
+            nearestSpotDiff = dist2Mouse;
+            nearestSpot = actSpot;
+          }
+        }
+      }
+    }
+
+    if (nearestSpot) {
+      // console.log('nearest pixelpos', nearestSpot.pixelPos);
+      // nearestSpot.draw(ctx, new HSL());
+      nearestSpot.drawHighlight(ctx);
     }
   }
 }
