@@ -151,7 +151,7 @@ export class AStar {
     let vecPrev = null;
     for (let i = 0; i < path.length; i++) {
       const spot = path[i];
-      const actPathVec = spot.calcPos();
+      const actPathVec = spot.hexPos;
 
       const yAdjustedVec = new Vector(actPathVec.x, actPathVec.y - spot.z - offset);
 
