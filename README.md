@@ -16,3 +16,4 @@ TODO
   Ganz konkret 1 tile neben dem Pfad auf z 1 setzen.
 - Tiles per maus Auswählen und den Pfad dort starten enden lassen
 - Tiles per Maus "selektieren" und per Mausrad höhe ändern
+- Neighbours - wie viele werden berechnet und wie viele wären es, wenn man lazy berechnen würde
