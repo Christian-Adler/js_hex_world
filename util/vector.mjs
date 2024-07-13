@@ -77,6 +77,12 @@ class Vector {
     return this;
   }
 
+  round() {
+    this.x = Math.round(this.x);
+    this.y = Math.round(this.y);
+    return this;
+  }
+
   len() {
     return Math.sqrt(this.x ** 2 + this.y ** 2);
   }
@@ -122,6 +128,10 @@ class Vector {
     const x = Math.cos(radians);
     const y = Math.sin(radians);
     return new Vector(x, y);
+  }
+
+  static fromPoint(point) {
+    return new Vector(point.x, point.y);
   }
 
   static scalarProjection(vecP, vecA, vecB) {
