@@ -59,10 +59,10 @@ const update = () => {
 
     if (worldUpdateRequired)
       world.worldUpdateTilesPixelPos(ctx);
+
+    world.draw(ctx, worldUpdateRequired);
+
     world.determineActMouseSpot();
-
-    world.draw(ctx);
-
     world.highlightMousePos(ctx);
 
     if (aStar)
