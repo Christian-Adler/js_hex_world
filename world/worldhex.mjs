@@ -35,7 +35,12 @@ export class WorldHex {
     const world = this;
     window.addEventListener("wheel", function (ev) {
       // ev.preventDefault();
-      world.#updateSelectedSpotZ(ev.deltaY * -0.003, pressedSpecialKeys.shift);
+      let updateNeighboursDistance = 0;
+      if (pressedSpecialKeys.alt)
+        updateNeighboursDistance = 10;
+      else if (pressedSpecialKeys.shift)
+        updateNeighboursDistance = 5;
+      world.#updateSelectedSpotZ(ev.deltaY * -0.003, updateNeighboursDistance);
     });
     window.addEventListener("click", function (ev) {
       world.selectedSpot = world.actMouseSpot;
@@ -167,19 +172,19 @@ export class WorldHex {
     }
   }
 
-  #updateSelectedSpotZ(val, updateNeighbours) {
+  #updateSelectedSpotZ(val, updateNeighboursDistance) {
     const spotHex = this.selectedSpot;
     if (!spotHex)
       return;
 
     const updateSpots = [];
 
-    if (updateNeighbours) {
-      const spots = this.#findNeighboursOf(spotHex, 5);
+    if (updateNeighboursDistance > 0) {
+      const spots = this.#findNeighboursOf(spotHex, updateNeighboursDistance);
 
       for (const spot of spots) {
         const dist = spotHex.distanceToSpot(spot);
-        const distT = scale(dist, 0, 5, 0, 1);
+        const distT = scale(dist, 0, updateNeighboursDistance, 0, 1);
         const zUpdateVal = lerp(val, 0, distT);
         if (spot.z + zUpdateVal > 0) {
           spot.z += zUpdateVal;
