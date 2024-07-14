@@ -2,6 +2,8 @@ import {WorldHex} from "./world/worldhex.mjs";
 import {AStar} from "./util/astar.mjs";
 import {initControls} from "./ui/controls.mjs";
 
+const canvasWorld = document.getElementById("canvasWorld");
+const ctxWorld = canvasWorld.getContext('2d');
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
 
@@ -19,6 +21,8 @@ const updateWorldSettings = () => {
     worldHeight2 = worldHeight / 2;
     canvas.width = worldWidth;
     canvas.height = worldHeight;
+    canvasWorld.width = worldWidth;
+    canvasWorld.height = worldHeight;
     worldUpdated = true;
   }
 };
@@ -57,10 +61,15 @@ const update = () => {
     ctx.save();
     world.scale(ctx, worldWidth, worldHeight);
 
-    if (worldUpdateRequired)
-      world.worldUpdateTilesPixelPos(ctx);
+    if (worldUpdateRequired) {
+      const storedTransform = ctx.getTransform();
+      // console.log(storedTransform);
 
-    world.draw(ctx, worldUpdateRequired);
+      ctxWorld.setTransform(storedTransform);
+      world.worldUpdateTilesPixelPos(ctxWorld);
+      world.draw(ctxWorld, worldUpdateRequired);
+    }
+
 
     world.determineActMouseSpot();
     world.highlightMousePos(ctx);

@@ -21,8 +21,6 @@ export class WorldHex {
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
 
-    this.storedImgData = null;
-
     this.actMouseSpot = null;
   }
 
@@ -186,15 +184,9 @@ export class WorldHex {
     }
   }
 
-  draw(ctx, redraw) {
-    if (redraw || !this.storedImgData) {
-      for (const spot of this.gridTilesDrawOrder) {
-        spot.draw(ctx);
-      }
-      this.storedImgData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height).data;
-    } else {
-      const imageData = new ImageData(this.storedImgData, ctx.canvas.width, ctx.canvas.height);
-      ctx.putImageData(imageData, 0, 0);
+  draw(ctx) {
+    for (const spot of this.gridTilesDrawOrder) {
+      spot.draw(ctx);
     }
   }
 
