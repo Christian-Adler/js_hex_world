@@ -1,7 +1,7 @@
 import {Vector} from "../util/vector.mjs";
 import {SpotHex} from "./spothex.mjs";
 import {getNoiseValAt} from "./heightmap.mjs";
-import {actMousePos} from "../ui/mouse.mjs";
+import {actMousePos, initWheelListenerForWorld} from "../ui/mouse.mjs";
 
 export class WorldHex {
   static maxZ = 7;
@@ -17,11 +17,16 @@ export class WorldHex {
     this.rows = -1;
     this.scaleFactorX = 1;
     this.scaleFactorY = 1;
+    this.transform = null;
+
+    this.redrawRequired = false;
 
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
 
     this.actMouseSpot = null;
+
+    initWheelListenerForWorld(this);
   }
 
   determineNeighboursForAllTiles(force = false) {
@@ -131,9 +136,10 @@ export class WorldHex {
     this.scaleFactorY = worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ);
   }
 
-  worldUpdateTilesPixelPos(ctx) {
-    const transform = ctx.getTransform();
-    const matrix = new DOMMatrixReadOnly(transform);
+  worldUpdateTilesPixelPos(ctxWorld) {
+    ctxWorld.setTransform(this.transform);
+
+    const matrix = new DOMMatrixReadOnly(this.transform);
 
     for (const spotHex of this.grid.values()) {
       const pos = spotHex.hexPos.clone();
@@ -141,12 +147,28 @@ export class WorldHex {
       const transformedPoint = matrix.transformPoint(pos);
       spotHex.pixelPos = Vector.fromPoint(transformedPoint);
     }
+  }
 
+  updateActMouseSpotZ(val) {
+    const spotHex = this.actMouseSpot;
+    if (!spotHex) return;
+    spotHex.z += val;
+    this.redrawRequired = true;
+
+    const matrix = new DOMMatrixReadOnly(this.transform);
+
+    const pos = spotHex.hexPos.clone();
+    pos.add(0, -spotHex.z);
+    const transformedPoint = matrix.transformPoint(pos);
+    spotHex.pixelPos = Vector.fromPoint(transformedPoint);
   }
 
   scale(ctx, worldWidth, worldHeight) {
     ctx.scale(this.scaleFactorX, this.scaleFactorY);
     ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldHex.maxZ);
+
+    // store transform for world canvas context
+    this.transform = ctx.getTransform();
   }
 
   #calcApproximateMouseWorldPos() {
@@ -184,9 +206,10 @@ export class WorldHex {
     }
   }
 
-  draw(ctx) {
+  draw(ctxWorld) {
+    this.redrawRequired = false;
     for (const spot of this.gridTilesDrawOrder) {
-      spot.draw(ctx);
+      spot.draw(ctxWorld);
     }
   }
 
@@ -199,11 +222,10 @@ export class WorldHex {
     }
   }
 
-
-  highlightMousePos(ctx) {
+  highlightMousePos(ctxWorld) {
     if (this.actMouseSpot) {
-      // this._actMouseSpot.draw(ctx, new HSL());
-      this.actMouseSpot.drawHighlight(ctx);
+      // this._actMouseSpot.draw(ctxWorld, new HSL());
+      this.actMouseSpot.drawHighlight(ctxWorld);
     }
   }
 }

@@ -62,12 +62,10 @@ const update = () => {
     world.scale(ctx, worldWidth, worldHeight);
 
     if (worldUpdateRequired) {
-      const storedTransform = ctx.getTransform();
-      // console.log(storedTransform);
-
-      ctxWorld.setTransform(storedTransform);
       world.worldUpdateTilesPixelPos(ctxWorld);
-      world.draw(ctxWorld, worldUpdateRequired);
+      world.draw(ctxWorld);
+    } else if (world.redrawRequired) {
+      world.draw(ctxWorld);
     }
 
 

@@ -6,6 +6,13 @@ window.addEventListener("mousemove", function (ev) {
   actMousePos.set(ev.clientX, ev.clientY);
 });
 
+const initWheelListenerForWorld = (world) => {
+  window.addEventListener("wheel", function (ev) {
+    // ev.preventDefault();
+    world.updateActMouseSpotZ(ev.deltaY * -0.01);
+  });
+}
+
 // stimmt nicht bei hex-grid
 const actMousePosInTransformCoordinates = (ctx) => {
   const transform = ctx.getTransform();
@@ -26,4 +33,4 @@ const actMousePosInTransformCoordinates = (ctx) => {
   return Vector.fromPoint(transformedPoint);
 };
 
-export {actMousePos, actMousePosInTransformCoordinates}
+export {actMousePos, actMousePosInTransformCoordinates, initWheelListenerForWorld}
