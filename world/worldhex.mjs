@@ -1,16 +1,14 @@
 import {Vector} from "../util/vector.mjs";
-import {World} from "./world.mjs";
 import {SpotHex} from "./spothex.mjs";
 import {getNoiseValAt} from "./heightmap.mjs";
 import {actMousePos} from "../ui/mouse.mjs";
 
-export class WorldHex extends World {
+export class WorldHex {
   static maxZ = 7;
   static widthTilesFactor = 50 / 1500;
   static heightTilesFactor = 50 / 1200;
 
   constructor() {
-    super();
     // world pos on screen top left
     this.worldTop = 0;
     this.worldLeft = 0;
@@ -22,6 +20,8 @@ export class WorldHex extends World {
 
     this.grid = new Map();
     this.gridTilesDrawOrder = [];
+
+    this.actMouseSpot = null;
   }
 
   determineNeighboursForAllTiles(force = false) {
@@ -59,16 +59,16 @@ export class WorldHex extends World {
     }
   }
 
-  generateTilesInViewArea() {
+  #generateTilesInViewArea() {
     for (let r = this.worldTop - WorldHex.maxZ; r < this.rows + WorldHex.maxZ; r++) {
       for (let c = this.worldLeft - 1; c < this.cols + 1; c++) {
         const pos = new Vector(c, r);
-        this.createTileIfNotExists(pos);
+        this.#createTileIfNotExists(pos);
       }
     }
   }
 
-  createTileIfNotExists(pos) {
+  #createTileIfNotExists(pos) {
     const key = pos.toString();
     let spotHex = this.grid.get(key);
     if (spotHex) // already in map?
@@ -104,7 +104,7 @@ export class WorldHex extends World {
   }
 
   getSpot(x, y) {
-    return this.createTileIfNotExists(new Vector(x, y));
+    return this.#createTileIfNotExists(new Vector(x, y));
   }
 
   getStart() {
@@ -122,7 +122,7 @@ export class WorldHex extends World {
       this.cols = colsWouldBe;
       this.rows = rowsWouldBe;
 
-      this.generateTilesInViewArea();
+      this.#generateTilesInViewArea();
 
       this.calcDrawOrder();
     }
@@ -153,22 +153,7 @@ export class WorldHex extends World {
     return new Vector(actMousePos.x / (SpotHex.xStep * this.scaleFactorX), actMousePos.y / (SpotHex.height * this.scaleFactorY)).round();
   }
 
-  draw(ctx) {
-    for (const spot of this.gridTilesDrawOrder) {
-      spot.draw(ctx);
-    }
-  }
-
-  drawPixelCoordinates(ctx) {
-    ctx.fillStyle = 'white';
-    for (const hexSpot of this.gridTilesDrawOrder) {
-      ctx.beginPath();
-      ctx.rect(hexSpot.pixelPos.x, hexSpot.pixelPos.y, 5, 5);
-      ctx.fill();
-    }
-  }
-
-  highlightMousePos(ctx) {
+  determineActMouseSpot() {
     // find nearest mouse pos Spot
     const actMouse = actMousePos;
     // console.log('actMouse', actMouse);
@@ -194,9 +179,31 @@ export class WorldHex extends World {
     }
 
     if (nearestSpot) {
+      this.actMouseSpot = nearestSpot;
       // console.log('nearest pixelpos', nearestSpot.pixelPos);
-      // nearestSpot.draw(ctx, new HSL());
-      nearestSpot.drawHighlight(ctx);
+    }
+  }
+
+  draw(ctx) {
+    for (const spot of this.gridTilesDrawOrder) {
+      spot.draw(ctx);
+    }
+  }
+
+  drawPixelCoordinates(ctx) {
+    ctx.fillStyle = 'white';
+    for (const hexSpot of this.gridTilesDrawOrder) {
+      ctx.beginPath();
+      ctx.rect(hexSpot.pixelPos.x, hexSpot.pixelPos.y, 5, 5);
+      ctx.fill();
+    }
+  }
+
+
+  highlightMousePos(ctx) {
+    if (this.actMouseSpot) {
+      // this._actMouseSpot.draw(ctx, new HSL());
+      this.actMouseSpot.drawHighlight(ctx);
     }
   }
 }

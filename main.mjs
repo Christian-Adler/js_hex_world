@@ -59,6 +59,7 @@ const update = () => {
 
     if (worldUpdateRequired)
       world.worldUpdateTilesPixelPos(ctx);
+    world.determineActMouseSpot();
 
     world.draw(ctx);
 

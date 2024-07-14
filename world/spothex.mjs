@@ -8,7 +8,7 @@ export class SpotHex extends Spot {
   static height = 2 * SpotHex.r * Math.sin(SpotHex.a);
   static xStep = SpotHex.r + SpotHex.r * Math.cos(SpotHex.a);
 
-  static calcHexAdjustedPos(pos) {
+  static #calcHexAdjustedPos(pos) {
     const xAdjusted = pos.x * SpotHex.xStep;
     const yAdjusted = pos.y * SpotHex.height + (pos.x % 2 === 0 ? 0 : SpotHex.height / 2);
     return new Vector(xAdjusted, yAdjusted);
@@ -17,7 +17,7 @@ export class SpotHex extends Spot {
   constructor(pos, z) {
     super(pos, z, WorldHex.maxZ);
     // hexPos is the hex "grid" adjusted pos without z!
-    this.hexPos = this.calcHexPos();
+    this.hexPos = SpotHex.#calcHexAdjustedPos(this.pos);
     // pixel pos has to be calculated by transform
     // pixel pos is the hexPos with z and transform
     this.pixelPos = new Vector(0, 0);
@@ -30,10 +30,6 @@ export class SpotHex extends Spot {
    */
   distanceToSpot(other) {
     return this.hexPos.distance(other.hexPos);
-  }
-
-  calcHexPos() {
-    return SpotHex.calcHexAdjustedPos(this.pos);
   }
 
   draw(ctx, hsl) {
