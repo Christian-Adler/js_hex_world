@@ -1,6 +1,5 @@
 import {Spot} from "./spot.mjs";
 import {Vector} from "../util/vector.mjs";
-import {WorldHex} from "./worldhex.mjs";
 
 export class SpotHex extends Spot {
   static a = 2 * Math.PI / 6;
@@ -15,7 +14,7 @@ export class SpotHex extends Spot {
   }
 
   constructor(pos, z) {
-    super(pos, z, WorldHex.maxZ);
+    super(pos, z);
     // hexPos is the hex "grid" adjusted pos without z!
     this.hexPos = SpotHex.#calcHexAdjustedPos(this.pos);
     // pixel pos has to be calculated by transform
@@ -75,12 +74,12 @@ export class SpotHex extends Spot {
     ctx.fill();
   }
 
-  drawHighlight(ctx) {
+  drawHighlight(ctx, hsl) {
     ctx.beginPath();
     // ctx.rect(pos.x, pos.y, 1, 1);
     ctx.lineWidth = 0.2;
     let aFactor = 0;
-    let r = SpotHex.r * 1.5;
+    let r = SpotHex.r * (hsl ? 1.1 : 1.5);
     for (let i = 0; i < 6; i++) {
       ctx.lineTo(this.hexPos.x + r * Math.cos(SpotHex.a * i), this.hexPos.y + r * Math.sin(SpotHex.a * i) - this.z);
       aFactor += (i % 2 === 0) ? 1 : 3;
@@ -88,7 +87,7 @@ export class SpotHex extends Spot {
     ctx.closePath();
 
     // ctx.fillStyle = "white";
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = hsl ? hsl.toColor() : "white";
     // ctx.fill();
     ctx.stroke();
   }

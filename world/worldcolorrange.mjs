@@ -9,8 +9,11 @@ const colors = [new HSL(120), new HSL(84), new HSL(92, 100, 19), new HSL(92, 0, 
  */
 export const getWorldColor = (val) => {
   let slotIdx = Math.floor((colors.length - 1) * val);
-  if (slotIdx < 0) slotIdx = 0;
-  if (slotIdx >= colors.length - 1) slotIdx = colors.length - 2;
+  if (slotIdx < 0)
+    return colors[0].clone();
+  if (slotIdx >= colors.length - 1)
+    return colors[colors.length - 1].clone();
+  
   const color1 = colors[slotIdx];
   const color2 = colors[slotIdx + 1];
 

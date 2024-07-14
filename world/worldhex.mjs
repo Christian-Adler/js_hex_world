@@ -1,12 +1,11 @@
 import {Vector} from "../util/vector.mjs";
 import {SpotHex} from "./spothex.mjs";
 import {getNoiseValAt} from "./heightmap.mjs";
-import {actMousePos, initWheelListenerForWorld} from "../ui/mouse.mjs";
+import {actMousePos} from "../ui/mouse.mjs";
+import {HSL} from "../util/hsl.mjs";
+import {worldSettings as WorldSettings} from "./worldsettings.mjs";
 
 export class WorldHex {
-  static maxZ = 7;
-  static widthTilesFactor = 50 / 1500;
-  static heightTilesFactor = 50 / 1200;
 
   constructor() {
     // world pos on screen top left
@@ -25,8 +24,25 @@ export class WorldHex {
     this.gridTilesDrawOrder = [];
 
     this.actMouseSpot = null;
+    this.selectedSpot = null;
 
-    initWheelListenerForWorld(this);
+    this.#initListeners();
+  }
+
+  #initListeners() {
+    const world = this;
+    window.addEventListener("wheel", function (ev) {
+      // ev.preventDefault();
+      world.#updateSelectedSpotZ(ev.deltaY * -0.003);
+    });
+    window.addEventListener("click", function (ev) {
+      world.selectedSpot = world.actMouseSpot;
+    });
+    window.addEventListener("contextmenu", function (ev) {
+      ev.preventDefault();
+      world.selectedSpot = null;
+      return false;
+    });
   }
 
   determineNeighboursForAllTiles(force = false) {
@@ -65,7 +81,7 @@ export class WorldHex {
   }
 
   #generateTilesInViewArea() {
-    for (let r = this.worldTop - WorldHex.maxZ; r < this.rows + WorldHex.maxZ; r++) {
+    for (let r = this.worldTop - WorldSettings.maxZ; r < this.rows + WorldSettings.maxZ; r++) {
       for (let c = this.worldLeft - 1; c < this.cols + 1; c++) {
         const pos = new Vector(c, r);
         this.#createTileIfNotExists(pos);
@@ -81,7 +97,7 @@ export class WorldHex {
     const zValue = getNoiseValAt(pos.x, pos.y);
     if (zValue < 0) // no land?
       return null;
-    spotHex = new SpotHex(pos, zValue * WorldHex.maxZ);
+    spotHex = new SpotHex(pos, zValue * WorldSettings.maxZ);
     this.grid.set(key, spotHex);
     return spotHex;
   }
@@ -121,8 +137,8 @@ export class WorldHex {
   }
 
   worldUpdate(worldWidth, worldHeight) {
-    const colsWouldBe = Math.floor(WorldHex.widthTilesFactor * worldWidth);
-    const rowsWouldBe = Math.floor(WorldHex.heightTilesFactor * worldHeight);
+    const colsWouldBe = Math.floor(WorldSettings.widthTilesFactor * worldWidth);
+    const rowsWouldBe = Math.floor(WorldSettings.heightTilesFactor * worldHeight);
     if (this.cols !== colsWouldBe || this.rows !== rowsWouldBe) {
       this.cols = colsWouldBe;
       this.rows = rowsWouldBe;
@@ -133,7 +149,7 @@ export class WorldHex {
     }
 
     this.scaleFactorX = worldWidth / ((this.cols - 1) * SpotHex.xStep + 2 * SpotHex.r);
-    this.scaleFactorY = worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldHex.maxZ);
+    this.scaleFactorY = worldHeight / ((this.rows + 0.5) * SpotHex.height + WorldSettings.maxZ);
   }
 
   worldUpdateTilesPixelPos(ctxWorld) {
@@ -149,10 +165,15 @@ export class WorldHex {
     }
   }
 
-  updateActMouseSpotZ(val) {
-    const spotHex = this.actMouseSpot;
+  #updateSelectedSpotZ(val) {
+    const spotHex = this.selectedSpot;
     if (!spotHex) return;
     spotHex.z += val;
+    if (spotHex.z < 0) {
+      spotHex.z -= val;
+      return;
+    }
+    spotHex.updateWorldColor();
     this.redrawRequired = true;
 
     const matrix = new DOMMatrixReadOnly(this.transform);
@@ -165,7 +186,7 @@ export class WorldHex {
 
   scale(ctx, worldWidth, worldHeight) {
     ctx.scale(this.scaleFactorX, this.scaleFactorY);
-    ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldHex.maxZ);
+    ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldSettings.maxZ);
 
     // store transform for world canvas context
     this.transform = ctx.getTransform();
@@ -223,6 +244,9 @@ export class WorldHex {
   }
 
   highlightMousePos(ctxWorld) {
+    if (this.selectedSpot) {
+      this.selectedSpot.drawHighlight(ctxWorld, new HSL());
+    }
     if (this.actMouseSpot) {
       // this._actMouseSpot.draw(ctxWorld, new HSL());
       this.actMouseSpot.drawHighlight(ctxWorld);

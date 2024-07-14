@@ -61,10 +61,10 @@ const update = () => {
     ctx.save();
     world.scale(ctx, worldWidth, worldHeight);
 
-    if (worldUpdateRequired) {
-      world.worldUpdateTilesPixelPos(ctxWorld);
-      world.draw(ctxWorld);
-    } else if (world.redrawRequired) {
+    if (world.redrawRequired || worldUpdateRequired) {
+      ctxWorld.clearRect(0, 0, worldWidth, worldHeight);
+      if (worldUpdateRequired)
+        world.worldUpdateTilesPixelPos(ctxWorld);
       world.draw(ctxWorld);
     }
 
