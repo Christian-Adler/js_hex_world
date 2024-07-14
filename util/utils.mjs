@@ -7,6 +7,17 @@ const lerpVec = (a, b, t) => {
   return new Vector(lerp(a.x, b.x, t), lerp(a.y, b.y, t));
 };
 
+const easeInOut = (a, b, t) => {
+  const tSin = Math.sin(Math.PI * (t - 0.5)) / 2 + 0.5;
+  // console.log(Math.sin(Math.PI * -0.5) / 2 + 0.5);
+  // console.log(Math.sin(Math.PI * -0.25) / 2 + 0.5);
+  // console.log(Math.sin(Math.PI * 0) / 2 + 0.5);
+  // console.log(Math.sin(Math.PI * 0.25) / 2 + 0.5);
+  // console.log(Math.sin(Math.PI * 0.5) / 2 + 0.5);
+
+  return a + (b - a) * tSin;
+};
+
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 const getRandomIntInclusive = (min, max) => {
   const minCeiled = Math.ceil(min);
@@ -26,4 +37,4 @@ const scale = (number, inMin, inMax, outMin, outMax) => {
   return (number - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
 }
 
-export {lerp, lerpVec, getRandomIntInclusive, rad2deg, deg2rad, scale}
+export {lerp, lerpVec, easeInOut, getRandomIntInclusive, rad2deg, deg2rad, scale}

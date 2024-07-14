@@ -3,7 +3,9 @@ import {SpotHex} from "./spothex.mjs";
 import {getNoiseValAt} from "./heightmap.mjs";
 import {actMousePos} from "../ui/mouse.mjs";
 import {HSL} from "../util/hsl.mjs";
+import {lerp, scale} from "../util/utils.mjs";
 import {worldSettings as WorldSettings} from "./worldsettings.mjs";
+import {pressedSpecialKeys} from "../ui/keys.mjs";
 
 export class WorldHex {
 
@@ -33,7 +35,7 @@ export class WorldHex {
     const world = this;
     window.addEventListener("wheel", function (ev) {
       // ev.preventDefault();
-      world.#updateSelectedSpotZ(ev.deltaY * -0.003);
+      world.#updateSelectedSpotZ(ev.deltaY * -0.003, pressedSpecialKeys.shift);
     });
     window.addEventListener("click", function (ev) {
       world.selectedSpot = world.actMouseSpot;
@@ -165,23 +167,62 @@ export class WorldHex {
     }
   }
 
-  #updateSelectedSpotZ(val) {
+  #updateSelectedSpotZ(val, updateNeighbours) {
     const spotHex = this.selectedSpot;
-    if (!spotHex) return;
-    spotHex.z += val;
-    if (spotHex.z < 0) {
-      spotHex.z -= val;
+    if (!spotHex)
       return;
+
+    const updateSpots = [];
+
+    if (updateNeighbours) {
+      const spots = this.#findNeighboursOf(spotHex, 5);
+
+      for (const spot of spots) {
+        const dist = spotHex.distanceToSpot(spot);
+        const distT = scale(dist, 0, 5, 0, 1);
+        const zUpdateVal = lerp(val, 0, distT);
+        if (spot.z + zUpdateVal > 0) {
+          spot.z += zUpdateVal;
+          updateSpots.push(spot);
+        }
+      }
+    } else {
+      if (spotHex.z + val > 0)
+        spotHex.z += val;
+      updateSpots.push(spotHex);
     }
-    spotHex.updateWorldColor();
-    this.redrawRequired = true;
 
-    const matrix = new DOMMatrixReadOnly(this.transform);
+    if (updateSpots.length > 0)
+      this.redrawRequired = true;
 
-    const pos = spotHex.hexPos.clone();
-    pos.add(0, -spotHex.z);
-    const transformedPoint = matrix.transformPoint(pos);
-    spotHex.pixelPos = Vector.fromPoint(transformedPoint);
+    for (const updateSpot of updateSpots) {
+      updateSpot.updateWorldColor();
+
+      const matrix = new DOMMatrixReadOnly(this.transform);
+
+      const pos = updateSpot.hexPos.clone();
+      pos.add(0, -updateSpot.z);
+      const transformedPoint = matrix.transformPoint(pos);
+      updateSpot.pixelPos = Vector.fromPoint(transformedPoint);
+    }
+  }
+
+  #findNeighboursOf(spot, maxDistance) {
+    const neighbours = new Set();
+    const workList = [spot];
+
+    while (workList.length > 0) {
+      const actSpot = workList.splice(0, 1)[0];
+      neighbours.add(actSpot);
+      const actNeighbours = actSpot.getNeighbours();
+      for (const actNeighbour of actNeighbours) {
+        if (!neighbours.has(actNeighbour) && spot.distanceToSpot(actNeighbour) <= maxDistance) {
+          workList.push(actNeighbour);
+        }
+      }
+    }
+
+    return [...neighbours];
   }
 
   scale(ctx, worldWidth, worldHeight) {
