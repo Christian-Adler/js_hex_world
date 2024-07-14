@@ -40,6 +40,7 @@ export class AStar {
     this._closedSet = [];
 
     this._start.g = 0;
+    this._start.prevSpot = null;
     this._openSet.push(this._start);
 
     let finished = false;

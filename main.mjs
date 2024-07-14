@@ -90,3 +90,21 @@ const update = () => {
 }
 
 update();
+
+window.addEventListener("keydown", (ev) => {
+  if (ev.isComposing || ev.keyCode === 229) {
+    return;
+  }
+  switch (ev.key) {
+    case "s": {
+      if (world.selectedSpot && aStar)
+        aStar.start = world.selectedSpot;
+      break;
+    }
+    case "e": {
+      if (world.selectedSpot && aStar)
+        aStar.end = world.selectedSpot;
+      break;
+    }
+  }
+});
