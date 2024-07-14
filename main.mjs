@@ -1,11 +1,14 @@
 import {WorldHex} from "./world/worldhex.mjs";
 import {AStar} from "./util/astar.mjs";
 import {initControls} from "./ui/controls.mjs";
+import {loadTextures} from "./world/texture.mjs";
 
 const canvasWorld = document.getElementById("canvasWorld");
 const ctxWorld = canvasWorld.getContext('2d');
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext('2d');
+
+await loadTextures(ctx);
 
 let worldWidth = canvas.width;
 let worldHeight = canvas.height;
