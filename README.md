@@ -15,3 +15,5 @@ TODO
 - Neighbours - wie viele werden berechnet und wie viele wären es, wenn man lazy berechnen würde
 - Hexagonal popup menu on tile selction?
 - Don't scale and translate but really scale on drawing
+- Sprites - Trees? DrawOrder? Sprite on Spot - render only small view on separate canvas
+- Hintergrund in Kacheln unterteilen - dann braucht immer nur die entsprechende kachel neu gerendert zu werden
