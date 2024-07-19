@@ -100,13 +100,13 @@ window.addEventListener("keydown", (ev) => {
   }
   switch (ev.key) {
     case "s": {
-      if (world.selectedSpot && aStar)
-        aStar.start = world.selectedSpot;
+      if (world.selectedSpots.length === 1 && aStar)
+        aStar.start = world.selectedSpots[0];
       break;
     }
     case "e": {
-      if (world.selectedSpot && aStar)
-        aStar.end = world.selectedSpot;
+      if (world.selectedSpots.length === 1 && aStar)
+        aStar.end = world.selectedSpots[0];
       break;
     }
   }

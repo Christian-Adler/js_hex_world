@@ -26,7 +26,7 @@ export class WorldHex {
     this.gridTilesDrawOrder = [];
 
     this.actMouseSpot = null;
-    this.selectedSpot = null;
+    this.selectedSpots = [];
 
     this.#initListeners();
   }
@@ -42,12 +42,14 @@ export class WorldHex {
         updateNeighboursDistance = 5;
       world.#updateSelectedSpotZ(ev.deltaY * -0.003, updateNeighboursDistance);
     });
-    window.addEventListener("click", function (ev) {
-      world.selectedSpot = world.actMouseSpot;
+    window.addEventListener("click", function (/*ev*/) {
+      if (!pressedSpecialKeys.ctrl)
+        world.selectedSpots = [];
+      world.selectedSpots.push(world.actMouseSpot);
     });
     window.addEventListener("contextmenu", function (ev) {
       ev.preventDefault();
-      world.selectedSpot = null;
+      world.selectedSpots = [];
       return false;
     });
   }
@@ -173,28 +175,28 @@ export class WorldHex {
   }
 
   #updateSelectedSpotZ(val, updateNeighboursDistance) {
-    const spotHex = this.selectedSpot;
-    if (!spotHex)
-      return;
-
     const updateSpots = [];
+    for (const spotHex of this.selectedSpots) {
+      if (updateNeighboursDistance > 0) {
+        const spots = this.#findNeighboursOf(spotHex, updateNeighboursDistance);
 
-    if (updateNeighboursDistance > 0) {
-      const spots = this.#findNeighboursOf(spotHex, updateNeighboursDistance);
-
-      for (const spot of spots) {
-        const dist = spotHex.distanceToSpot(spot);
-        const distT = scale(dist, 0, updateNeighboursDistance, 0, 1);
-        const zUpdateVal = lerp(val, 0, distT);
-        if (spot.z + zUpdateVal > 0) {
-          spot.z += zUpdateVal;
-          updateSpots.push(spot);
+        for (const spot of spots) {
+          const dist = spotHex.distanceToSpot(spot);
+          const distT = scale(dist, 0, updateNeighboursDistance, 0, 1);
+          const zUpdateVal = lerp(val, 0, distT);
+          if (spot.z + zUpdateVal > 0) {
+            spot.z += zUpdateVal;
+            updateSpots.push(spot);
+          } else if (spot.z > 0 && zUpdateVal < 0) {
+            spot.z = 0;
+            updateSpots.push(spot);
+          }
         }
+      } else {
+        if (spotHex.z + val > 0)
+          spotHex.z += val;
+        updateSpots.push(spotHex);
       }
-    } else {
-      if (spotHex.z + val > 0)
-        spotHex.z += val;
-      updateSpots.push(spotHex);
     }
 
     if (updateSpots.length > 0)
@@ -230,7 +232,7 @@ export class WorldHex {
     return [...neighbours];
   }
 
-  scale(ctx, worldWidth, worldHeight) {
+  scale(ctx /*, worldWidth, worldHeight */) {
     ctx.scale(this.scaleFactorX, this.scaleFactorY);
     ctx.translate(SpotHex.r, SpotHex.r * Math.sin(SpotHex.a) + WorldSettings.maxZ);
 
@@ -290,8 +292,8 @@ export class WorldHex {
   }
 
   highlightMousePos(ctxWorld) {
-    if (this.selectedSpot) {
-      this.selectedSpot.drawHighlight(ctxWorld, new HSL());
+    for (const selectedSpot of this.selectedSpots) {
+      selectedSpot.drawHighlight(ctxWorld, new HSL());
     }
     if (this.actMouseSpot) {
       // this._actMouseSpot.draw(ctxWorld, new HSL());
