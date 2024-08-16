@@ -2,6 +2,8 @@
 
 pseudo 3d world of hex tiles
 
+![Preview](https://github.com/Christian-Adler/js_hex_world/blob/main/preview.jpg?raw=true)
+
 TODO
 
 - move world
